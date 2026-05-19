@@ -1,0 +1,252 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Offer {
+  id           Int         @id @default(autoincrement())
+
+  userId Int?
+  user User? @relation(fields: [userId], references: [id])
+
+  brojPonude String?
+  godinaPonude Int?
+  redniBrojGodina Int?
+  naziv        String?
+  adresa       String?
+  telefon      String?
+  pib          String?
+  maticni      String?
+  datum        String?
+  vrsta_ponude String?
+  valuta       String?
+  popust       String?
+  napomena     String?
+
+
+
+  items        OfferItem[]
+  extraItems OfferExtraItem[]
+deleted Boolean @default(false)
+}
+
+model OfferItem {
+  id       Int @id @default(autoincrement())
+  offerId  Int
+  offer    Offer @relation(fields: [offerId], references: [id])
+
+  vrsta_stolarije String?
+  vrsta_prozora   String?
+  a Int?
+  b Int?
+  c Int?
+  d Int?
+  profil String?
+  ispuna String?
+  okov String?
+  otvaranje String?
+  roletna String?
+  komarnik String?
+  kolicina Int?
+}
+
+
+
+model Param {
+  id     Int     @id @default(autoincrement())
+  grupa  String
+  naziv  String
+  cena   Float?
+}
+
+
+model Setting {
+  id     Int    @id @default(autoincrement())
+  userId Int?
+  key    String
+  value  String
+
+  @@unique([userId, key])
+}
+
+
+
+
+model ProfileParam {
+  id        Int    @id @default(autoincrement())
+  profil    String
+  parametar String
+  vrednost  Float
+}
+
+model ProfilePrice {
+  id      Int    @id @default(autoincrement())
+  userId  Int?
+  profil  String
+  element String
+  cena    Float
+
+  @@unique([userId, profil, element], name: "price_user_profil_element")
+}
+
+
+model Okov {
+  id     Int    @id @default(autoincrement())
+  userId Int?
+  naziv  String
+  cena   Float
+}
+
+
+model Params {
+  id     Int    @id @default(autoincrement())
+  grupa  String
+  naziv  String
+}
+
+
+
+model Ispuna {
+  id     Int    @id @default(autoincrement())
+  userId Int?
+  naziv  String
+  cena   Float
+}
+
+
+
+model Profil {
+  id     Int    @id @default(autoincrement())
+  userId Int?
+  naziv  String
+}
+
+
+model Valuta {
+  id     Int    @id @default(autoincrement())
+  userId Int?
+  naziv  String
+}
+
+
+model Profile {
+  id     Int    @id @default(autoincrement())
+  naziv  String
+}
+
+
+
+
+
+
+
+
+model ProfileTehnicki {
+  id       Int    @id @default(autoincrement())
+  userId   Int?
+  profil   String
+  element  String
+  vrednost Float
+
+  @@unique([userId, profil, element], name: "user_profil_element")
+}
+
+
+
+
+
+
+model FormulaDefinition {
+  id               Int     @id @default(autoincrement())
+  vrstaStolarije   String?
+  vrstaProzora     String?
+  element          String
+  s                String?
+  v                String?
+  kom              String?
+  cena             String?
+  redosled         Int     @default(0)
+
+  @@index([vrstaStolarije, vrstaProzora])
+}
+
+
+
+
+
+
+model OfferExtraItem {
+  id        Int    @id @default(autoincrement())
+  offerId   Int
+  naziv     String?
+  kolicina  Int    @default(1)
+  cena      Float  @default(0)
+
+  offer     Offer  @relation(fields: [offerId], references: [id], onDelete: Cascade)
+}
+
+
+
+model User {
+  id            Int      @id @default(autoincrement())
+  username      String   @unique
+  password      String
+  role          String   @default("USER")
+
+  offers Offer[]
+
+  isActive      Boolean  @default(true)
+
+  licenseStart  DateTime?
+  licenseEnd    DateTime?
+  maxDevices    Int      @default(1)
+  devices UserDevice[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+deleted Boolean @default(false)
+}
+
+
+model UserDevice {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  fingerprint String
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, fingerprint])
+}
+
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  username  String
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+}
+
+model HelpText {
+  id        Int    @id @default(autoincrement())
+  fieldName String @unique
+  text      String @default("")
+}
+
+model AdSetting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String @default("")
+}
+
+model AdClick {
+  id        Int      @id @default(autoincrement())
+  adKey     String
+  createdAt DateTime @default(now())
+}

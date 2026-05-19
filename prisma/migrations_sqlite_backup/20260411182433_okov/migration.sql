@@ -1,0 +1,6 @@
+-- CreateTable
+CREATE TABLE "Okov" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "naziv" TEXT NOT NULL,
+    "cena" REAL NOT NULL
+);
