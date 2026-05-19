@@ -16,8 +16,14 @@ await NestFactory.create<NestExpressApplication>(
 
   // DOZVOLJAVAMO FRONTEND SA 3000 PORTA
   app.enableCors({
-    origin: 'http://localhost:3000',
-  });
+  origin: [
+    "http://localhost:3000",
+    "https://stolarija-frontend.vercel.app",
+  ],
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+  allowedHeaders: "Content-Type, Authorization",
+  credentials: true,
+});
 
 
 app.useStaticAssets(
