@@ -13,10 +13,12 @@ import { BackupModule } from './backup/backup.module';
 import { AuditModule } from './audit/audit.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AdsModule } from './ads/ads.module';
+import { InstructionModule } from './instruction/instruction.module';
 
 
 @Module({
   imports: [
+  InstructionModule,
   AdsModule,
 HelpTextsModule,
 ThrottlerModule.forRoot([
