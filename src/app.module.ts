@@ -14,10 +14,12 @@ import { AuditModule } from './audit/audit.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AdsModule } from './ads/ads.module';
 import { InstructionModule } from './instruction/instruction.module';
+import { TranslationModule } from './translation/translation.module';
 
 
 @Module({
   imports: [
+  TranslationModule,
   InstructionModule,
   AdsModule,
 HelpTextsModule,
