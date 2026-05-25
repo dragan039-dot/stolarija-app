@@ -15,10 +15,14 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AdsModule } from './ads/ads.module';
 import { InstructionModule } from './instruction/instruction.module';
 import { TranslationModule } from './translation/translation.module';
+import { RoletnaModule } from './roletna/roletna.module';
+import { KomarnikModule } from './komarnik/komarnik.module';
 
 
 @Module({
   imports: [
+  RoletnaModule,
+  KomarnikModule,
   TranslationModule,
   InstructionModule,
   AdsModule,

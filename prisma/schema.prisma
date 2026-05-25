@@ -278,3 +278,17 @@ model Translation {
 
   @@unique([key, languageId])
 }
+
+model Roletna {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  naziv  String
+  cena   Float  @default(0)
+}
+
+model Komarnik {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  naziv  String
+  cena   Float  @default(0)
+}
