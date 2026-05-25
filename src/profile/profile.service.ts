@@ -137,9 +137,22 @@ this.setCtxValue(ctx, "ZARADA_PROCENAT", Number(input.firma?.zarada) || 0);
 
 
     // posebne cene
-    this.setCtxValue(ctx, 'Ispuna Cena', Number(input.ispunaCena) || 0);
-    this.setCtxValue(ctx, 'OKOV', Number(input.okovCena) || 0);
-    this.setCtxValue(ctx, 'PLASTIKA', Number(input.plastikaCena) || 0);
+this.setCtxValue(ctx, 'Ispuna Cena', Number(input.ispunaCena) || 0);
+this.setCtxValue(ctx, 'OKOV', Number(input.okovCena) || 0);
+this.setCtxValue(ctx, 'PLASTIKA', Number(input.plastikaCena) || 0);
+
+// NOVE CENE
+this.setCtxValue(
+  ctx,
+  'Roletna Cena',
+  Number(input.roletnaCena) || 0
+);
+
+this.setCtxValue(
+  ctx,
+  'Komarnik Cena',
+  Number(input.komarnikCena) || 0
+);
 
     // uslovi 0 / 1
     this.setCtxValue(ctx, 'RoletnaTip', Number(input.roletnaTip) || 0);
