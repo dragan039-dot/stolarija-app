@@ -50,6 +50,7 @@ model OfferItem {
   okov String?
   otvaranje String?
   roletna String?
+  vrsta_roletne String?
   komarnik String?
   kolicina Int?
 }
