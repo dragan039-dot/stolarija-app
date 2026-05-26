@@ -154,6 +154,12 @@ this.setCtxValue(
   Number(input.komarnikCena) || 0
 );
 
+this.setCtxValue(
+  ctx,
+  'DodElement Cena',
+  Number(input.dodatniElementCena) || 0
+);
+
     // uslovi 0 / 1
     this.setCtxValue(ctx, 'RoletnaTip', Number(input.roletnaTip) || 0);
     this.setCtxValue(ctx, 'ImaRoletnu', Number(input.imaRoletnu) || 0);
