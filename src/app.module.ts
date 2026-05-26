@@ -17,6 +17,7 @@ import { InstructionModule } from './instruction/instruction.module';
 import { TranslationModule } from './translation/translation.module';
 import { RoletnaModule } from './roletna/roletna.module';
 import { KomarnikModule } from './komarnik/komarnik.module';
+import { DodatniElementModule } from './dodatni-element/dodatni-element.module';
 
 
 @Module({
@@ -27,6 +28,7 @@ import { KomarnikModule } from './komarnik/komarnik.module';
   InstructionModule,
   AdsModule,
 HelpTextsModule,
+DodatniElementModule,
 ThrottlerModule.forRoot([
   {
     ttl: 90000,

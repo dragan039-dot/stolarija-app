@@ -293,3 +293,10 @@ model Komarnik {
   naziv  String
   cena   Float  @default(0)
 }
+
+model DodatniElement {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  naziv  String
+  cena   Float  @default(0)
+}
