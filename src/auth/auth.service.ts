@@ -190,6 +190,7 @@ defaultLanguageId:
         licenseStart: true,
         licenseEnd: true,
         maxDevices: true,
+        defaultLanguageId: true,
       },
     });
 
