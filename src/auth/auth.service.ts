@@ -117,13 +117,16 @@ export class AuthService {
     return {
       token,
       user: {
-        id: user.id,
-        username: user.username,
-        role: user.role,
-        isActive: user.isActive,
-        licenseEnd: user.licenseEnd,
-        maxDevices: user.maxDevices,
-      },
+  id: user.id,
+  username: user.username,
+  role: user.role,
+  isActive: user.isActive,
+  licenseEnd: user.licenseEnd,
+  maxDevices: user.maxDevices,
+
+  defaultLanguageId:
+    user.defaultLanguageId,
+},
     };
   }
 
@@ -142,6 +145,8 @@ async getUsers() {
       licenseEnd: true,
       maxDevices: true,
       createdAt: true,
+      
+      defaultLanguageId: true,
     },
   });
 }
@@ -170,6 +175,12 @@ async getUsers() {
         licenseStart: data.licenseStart ? new Date(data.licenseStart) : null,
         licenseEnd: data.licenseEnd ? new Date(data.licenseEnd) : null,
         maxDevices: Number(data.maxDevices) || 1,
+
+defaultLanguageId:
+  data.defaultLanguageId
+    ? Number(data.defaultLanguageId)
+    : null,
+
       },
       select: {
         id: true,
@@ -316,6 +327,12 @@ async deleteUser(id: number) {
         isActive: Boolean(data.isActive),
         licenseEnd: data.licenseEnd ? new Date(data.licenseEnd) : null,
         maxDevices: Number(data.maxDevices) || 1,
+
+defaultLanguageId:
+  data.defaultLanguageId
+    ? Number(data.defaultLanguageId)
+    : null,
+
       },
       select: {
         id: true,
@@ -324,6 +341,7 @@ async deleteUser(id: number) {
         isActive: true,
         licenseEnd: true,
         maxDevices: true,
+        defaultLanguageId: true,
       },
     });
 

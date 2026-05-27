@@ -199,6 +199,8 @@ model User {
   password      String
   role          String   @default("USER")
 
+  defaultLanguageId Int?
+
   offers Offer[]
 
   isActive      Boolean  @default(true)
