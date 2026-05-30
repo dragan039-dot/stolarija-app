@@ -80,6 +80,7 @@ export class ProfileService {
     this.setCtxValue(ctx, 'B', Number(input.B) || (isPreview ? 1000 : 0));
     this.setCtxValue(ctx, 'C', Number(input.C) || 0);
     this.setCtxValue(ctx, 'D', Number(input.D) || (isPreview ? 500 : 0));
+    this.setCtxValue(ctx, 'E', Number(input.E) || 0);
 
     // iz frontenda
     Object.entries(input.tehnicki || {}).forEach(([key, value]) => {

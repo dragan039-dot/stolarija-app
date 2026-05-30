@@ -45,6 +45,7 @@ model OfferItem {
   b Int?
   c Int?
   d Int?
+  e Int?
   profil String?
   ispuna String?
   okov String?
