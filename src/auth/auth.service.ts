@@ -176,6 +176,7 @@ async getUsers() {
         licenseEnd: data.licenseEnd ? new Date(data.licenseEnd) : null,
         maxDevices: Number(data.maxDevices) || 1,
 
+
 defaultLanguageId:
   data.defaultLanguageId
     ? Number(data.defaultLanguageId)
@@ -190,6 +191,7 @@ defaultLanguageId:
         licenseStart: true,
         licenseEnd: true,
         maxDevices: true,
+
         defaultLanguageId: true,
       },
     });
@@ -329,6 +331,7 @@ async deleteUser(id: number) {
         licenseEnd: data.licenseEnd ? new Date(data.licenseEnd) : null,
         maxDevices: Number(data.maxDevices) || 1,
 
+
 defaultLanguageId:
   data.defaultLanguageId
     ? Number(data.defaultLanguageId)
@@ -342,6 +345,7 @@ defaultLanguageId:
         isActive: true,
         licenseEnd: true,
         maxDevices: true,
+
         defaultLanguageId: true,
       },
     });
