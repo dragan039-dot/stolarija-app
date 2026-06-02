@@ -44,14 +44,14 @@ export class BackupService implements OnModuleInit {
       const fileName = `backup-${date}.sql`;
       const backupPath = path.join(backupDir, fileName);
 
-      const pgDumpPath = `"C:\\Program Files\\PostgreSQL\\18\\bin\\pg_dump.exe"`;
+      const pgDumpPath = '/usr/lib/postgresql/18/bin/pg_dump';
 
-      const command = `${pgDumpPath} -U postgres -h localhost -p 5432 -d stolarija --clean --if-exists -f "${backupPath}"`;
+      const command = `${pgDumpPath} -U stolarija_user -h localhost -p 5432 -d stolarija_db --clean --if-exists -f "${backupPath}"`;
 
       await execAsync(command, {
         env: {
           ...process.env,
-          PGPASSWORD: 'postgres',
+          PGPASSWORD: 'D123654789r',
         },
       });
 
@@ -122,39 +122,38 @@ export class BackupService implements OnModuleInit {
         };
       }
 
-      const pgDumpPath = `"C:\\Program Files\\PostgreSQL\\18\\bin\\pg_dump.exe"`;
-      const psqlPath = `"C:\\Program Files\\PostgreSQL\\18\\bin\\psql.exe"`;
-
+const pgDumpPath = '/usr/lib/postgresql/18/bin/pg_dump';
+const psqlPath = '/usr/lib/postgresql/18/bin/psql';
       const now = Date.now();
       const safetyBackup = `before-restore-${now}.sql`;
       const safetyPath = path.join(backupDir, safetyBackup);
 
       await execAsync(
-        `${pgDumpPath} -U postgres -h localhost -p 5432 -d stolarija --clean --if-exists -f "${safetyPath}"`,
+        `${pgDumpPath} -U stolarija_user -h localhost -p 5432 -d stolarija_db --clean --if-exists -f "${safetyPath}"`,
         {
           env: {
             ...process.env,
-            PGPASSWORD: 'postgres',
+            PGPASSWORD: 'D123654789r',
           },
         },
       );
 
       await execAsync(
-        `${psqlPath} -U postgres -h localhost -p 5432 -d stolarija -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"`,
+        `${psqlPath} -U stolarija_user -h localhost -p 5432 -d stolarija_db -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"`,
         {
           env: {
             ...process.env,
-            PGPASSWORD: 'postgres',
+            PGPASSWORD: 'D123654789r',
           },
         },
       );
 
       await execAsync(
-        `${psqlPath} -U postgres -h localhost -p 5432 -d stolarija -f "${backupPath}"`,
+        `${psqlPath} -U stolarija_user -h localhost -p 5432 -d stolarija_db -f "${backupPath}"`,
         {
           env: {
             ...process.env,
-            PGPASSWORD: 'postgres',
+            PGPASSWORD: 'D123654789r',
           },
         },
       );
@@ -180,3 +179,16 @@ export class BackupService implements OnModuleInit {
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
