@@ -5,7 +5,8 @@ import { PrismaService } from '../prisma.service';
 export class SiteRequestsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: any, ip?: string) {
+  async create(data: any = {}, ip?: string) {
+
     if (data.website) {
       return { success: true };
     }
