@@ -1,9 +1,13 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class SiteRequestsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+  private prisma: PrismaService,
+  private mail: MailService,
+) {}
 
   async create(data: any = {}, ip?: string) {
 
@@ -32,8 +36,8 @@ export class SiteRequestsService {
       );
     }
 
-    return this.prisma.siteRequest.create({
-      data: {
+    const created = await this.prisma.siteRequest.create({
+  data: {
         firma: data.firma || '',
         pib: data.pib || '',
         kontaktOsoba: data.kontaktOsoba || '',
@@ -44,6 +48,13 @@ export class SiteRequestsService {
         ip: ip || '',
       },
     });
+try {
+  await this.mail.sendSiteRequestEmail(created);
+} catch (err) {
+  console.error('SITE REQUEST EMAIL ERROR:', err);
+}
+
+return created;
   }
 
   getAll() {
