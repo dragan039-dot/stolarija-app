@@ -18,6 +18,7 @@ import { TranslationModule } from './translation/translation.module';
 import { RoletnaModule } from './roletna/roletna.module';
 import { KomarnikModule } from './komarnik/komarnik.module';
 import { DodatniElementModule } from './dodatni-element/dodatni-element.module';
+import { SiteRequestsModule } from './site-requests/site-requests.module';
 
 
 @Module({
@@ -27,6 +28,7 @@ import { DodatniElementModule } from './dodatni-element/dodatni-element.module';
   TranslationModule,
   InstructionModule,
   AdsModule,
+SiteRequestsModule,
 HelpTextsModule,
 DodatniElementModule,
 ThrottlerModule.forRoot([

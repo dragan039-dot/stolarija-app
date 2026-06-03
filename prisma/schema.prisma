@@ -304,3 +304,17 @@ model DodatniElement {
   naziv  String
   cena   Float  @default(0)
 }
+
+model SiteRequest {
+  id            Int      @id @default(autoincrement())
+  firma         String?
+  pib           String?
+  kontaktOsoba  String?
+  telefon       String?
+  email         String?
+  brojKorisnika String?
+  poruka        String?
+  ip            String?
+  deleted       Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
