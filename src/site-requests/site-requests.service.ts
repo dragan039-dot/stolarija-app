@@ -48,13 +48,16 @@ export class SiteRequestsService {
         ip: ip || '',
       },
     });
-try {
-  await this.mail.sendSiteRequestEmail(created);
-} catch (err) {
-  console.error('SITE REQUEST EMAIL ERROR:', err);
-}
+this.mail
+  .sendSiteRequestEmail(created)
+  .catch((err) => {
+    console.error('SITE REQUEST EMAIL ERROR:', err);
+  });
 
-return created;
+return {
+  success: true,
+  request: created,
+};
   }
 
   getAll() {
