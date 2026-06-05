@@ -315,6 +315,9 @@ model SiteRequest {
   brojKorisnika String?
   poruka        String?
   ip            String?
+status        String  @default("Novi")
+adminNapomena String?
   deleted       Boolean  @default(false)
   createdAt     DateTime @default(now())
+
 }

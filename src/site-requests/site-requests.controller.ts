@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -32,6 +33,12 @@ export class SiteRequestsController {
   }
 
   @UseGuards(JwtAuthGuard)
+
+@Put(':id')
+update(@Param('id') id: string, @Body() body: any) {
+  return this.service.update(Number(id), body);
+}
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.service.remove(Number(id));

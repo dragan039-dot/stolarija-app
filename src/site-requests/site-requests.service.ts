@@ -71,6 +71,16 @@ return {
     });
   }
 
+async update(id: number, data: any) {
+  return this.prisma.siteRequest.update({
+    where: { id },
+    data: {
+      status: data.status || "Novi",
+      adminNapomena: data.adminNapomena || "",
+    },
+  });
+}
+
   async remove(id: number) {
     await this.prisma.siteRequest.update({
       where: { id },
