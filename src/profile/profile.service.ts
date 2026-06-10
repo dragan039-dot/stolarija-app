@@ -167,6 +167,10 @@ this.setCtxValue(
     this.setCtxValue(ctx, 'ImaKomarnik', Number(input.imaKomarnik) || 0);
     this.setCtxValue(ctx, 'ImaOkov', Number(input.imaOkov) || 0);
     this.setCtxValue(ctx, 'ImaIspunu', Number(input.imaIspunu) || 0);
+this.setCtxValue(ctx, 'ImaTprecka', Number(input.imaTprecka) || 0);
+this.setCtxValue(ctx, 'ImaTprečka', Number(input.imaTprecka) || 0);
+
+this.setCtxValue(ctx, 'E', Number(input.E) || 0);
 
     return ctx;
   }
