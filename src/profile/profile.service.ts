@@ -171,6 +171,11 @@ this.setCtxValue(ctx, 'ImaTprecka', Number(input.imaTprecka) || 0);
 this.setCtxValue(ctx, 'ImaTprečka', Number(input.imaTprecka) || 0);
 
 console.log(
+  "TEST ImaTprecka:",
+  input.imaTprecka
+);
+
+console.log(
   "ImaTprecka TEST:",
   input.imaTprecka,
   Number(input.imaTprecka) || 0
