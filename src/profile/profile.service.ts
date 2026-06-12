@@ -167,11 +167,12 @@ this.setCtxValue(
     this.setCtxValue(ctx, 'ImaKomarnik', Number(input.imaKomarnik) || 0);
     this.setCtxValue(ctx, 'ImaOkov', Number(input.imaOkov) || 0);
     this.setCtxValue(ctx, 'ImaIspunu', Number(input.imaIspunu) || 0);
-this.setCtxValue(ctx, 'ImaTprecka', Number(input.imaTprecka) || 0);
-this.setCtxValue(ctx, 'ImaTprečka', Number(input.imaTprecka) || 0);
-this.setCtxValue(ctx, 'imaTprecka', Number(input.imaTprecka) || 0);
-this.setCtxValue(ctx, 'imatprecka', Number(input.imaTprecka) || 0);
-this.setCtxValue(ctx, 'imatprečka', Number(input.imaTprecka) || 0);
+const imaTpreckaValue =
+  Number(input.E) > 1 ? 1 : 0;
+
+this.setCtxValue(ctx, 'ImaTprecka', imaTpreckaValue);
+this.setCtxValue(ctx, 'ImaTprečka', imaTpreckaValue);
+this.setCtxValue(ctx, 'imatprecka', imaTpreckaValue);
 
 console.log(
   "TEST ImaTprecka:",
