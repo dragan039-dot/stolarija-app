@@ -174,16 +174,7 @@ this.setCtxValue(ctx, 'ImaTprecka', imaTpreckaValue);
 this.setCtxValue(ctx, 'ImaTprečka', imaTpreckaValue);
 this.setCtxValue(ctx, 'imatprecka', imaTpreckaValue);
 
-console.log(
-  "TEST ImaTprecka:",
-  input.imaTprecka
-);
 
-console.log(
-  "ImaTprecka TEST:",
-  input.imaTprecka,
-  Number(input.imaTprecka) || 0
-);
 
 this.setCtxValue(ctx, 'E', Number(input.E) || 0);
 

@@ -271,6 +271,7 @@ model Language {
   sortOrder Int      @default(0)
 
   translations Translation[]
+siteTranslations SiteTranslation[]
 }
 
 model Translation {
@@ -320,4 +321,16 @@ adminNapomena String?
   deleted       Boolean  @default(false)
   createdAt     DateTime @default(now())
 
+}
+
+
+model SiteTranslation {
+  id         Int      @id @default(autoincrement())
+  key        String
+  value      String   @default("")
+  languageId Int
+
+  language   Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
+
+  @@unique([key, languageId])
 }

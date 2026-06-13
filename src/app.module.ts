@@ -19,6 +19,7 @@ import { RoletnaModule } from './roletna/roletna.module';
 import { KomarnikModule } from './komarnik/komarnik.module';
 import { DodatniElementModule } from './dodatni-element/dodatni-element.module';
 import { SiteRequestsModule } from './site-requests/site-requests.module';
+import { SiteTranslationsModule } from './site-translations/site-translations.module';
 
 
 @Module({
@@ -29,6 +30,7 @@ import { SiteRequestsModule } from './site-requests/site-requests.module';
   InstructionModule,
   AdsModule,
 SiteRequestsModule,
+SiteTranslationsModule,
 HelpTextsModule,
 DodatniElementModule,
 ThrottlerModule.forRoot([
