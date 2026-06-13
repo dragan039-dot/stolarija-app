@@ -4,9 +4,8 @@ import { SiteTranslationsService } from './site-translations.service';
 import { PrismaService } from '../prisma.service';
 import { AuthModule } from '../auth/auth.module';
 
-
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule],   // 🔥 OVO FALI
   controllers: [SiteTranslationsController],
   providers: [SiteTranslationsService, PrismaService],
 })
