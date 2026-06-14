@@ -15,6 +15,6 @@ import { AuthModule } from '../auth/auth.module';
     }),
   ],
   controllers: [SiteTranslationsController],
-  providers: [SiteTranslationsService],
+  providers: [SiteTranslationsService, PrismaService],
 })
 export class SiteTranslationsModule {}
