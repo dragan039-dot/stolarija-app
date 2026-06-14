@@ -10,7 +10,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 import { TranslationService } from './translation.service';
 
-// @UseGuards(JwtAuthGuard)
+
 @Controller('translation')
 export class TranslationController {
 
