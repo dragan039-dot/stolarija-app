@@ -468,7 +468,15 @@ profili.forEach((p, index) => {
 });
 
 const normalizeProfil = (profil: any) => {
-  return profilMap.get(String(profil)) || String(profil);
+  const raw = String(profil);
+
+  const foundIndex = profili.findIndex((p) => String(p.id) === raw);
+
+  if (foundIndex >= 0) {
+    return String(foundIndex + 1);
+  }
+
+  return raw;
 };
     const valute = await tx.valuta.findMany({ where: { userId: demoUser.id } });
     const settings = await tx.setting.findMany({ where: { userId: demoUser.id } });
