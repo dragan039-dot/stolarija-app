@@ -399,4 +399,223 @@ async restoreUser(id: number) {
   return { success: true };
 }
 
+
+
+async copyDemoDataToUser(targetUserId: number) {
+  const demoUser = await this.prisma.user.findUnique({
+    where: { username: 'DEMO' },
+  });
+
+  if (!demoUser) {
+    throw new BadRequestException('DEMO korisnik ne postoji');
+  }
+
+  if (demoUser.id === targetUserId) {
+    throw new BadRequestException('Ne možete kopirati DEMO podatke u DEMO korisnika');
+  }
+
+  const targetUser = await this.prisma.user.findUnique({
+    where: { id: targetUserId },
+  });
+
+  if (!targetUser) {
+    throw new BadRequestException('Korisnik ne postoji');
+  }
+
+  await this.prisma.$transaction(async (tx) => {
+    // 1. Brisanje starih ponuda korisnika
+    const oldOffers = await tx.offer.findMany({
+      where: { userId: targetUserId },
+      select: { id: true },
+    });
+
+    const oldOfferIds = oldOffers.map((x) => x.id);
+
+    if (oldOfferIds.length > 0) {
+      await tx.offerExtraItem.deleteMany({
+        where: { offerId: { in: oldOfferIds } },
+      });
+
+      await tx.offerItem.deleteMany({
+        where: { offerId: { in: oldOfferIds } },
+      });
+
+      await tx.offer.deleteMany({
+        where: { userId: targetUserId },
+      });
+    }
+
+    // 2. Brisanje starih parametara i cena korisnika
+    await tx.profilePrice.deleteMany({ where: { userId: targetUserId } });
+    await tx.profileTehnicki.deleteMany({ where: { userId: targetUserId } });
+    await tx.okov.deleteMany({ where: { userId: targetUserId } });
+    await tx.ispuna.deleteMany({ where: { userId: targetUserId } });
+    await tx.profil.deleteMany({ where: { userId: targetUserId } });
+    await tx.valuta.deleteMany({ where: { userId: targetUserId } });
+    await tx.setting.deleteMany({ where: { userId: targetUserId } });
+    await tx.roletna.deleteMany({ where: { userId: targetUserId } });
+    await tx.komarnik.deleteMany({ where: { userId: targetUserId } });
+    await tx.dodatniElement.deleteMany({ where: { userId: targetUserId } });
+
+    // 3. Učitavanje DEMO podataka
+    const prices = await tx.profilePrice.findMany({ where: { userId: demoUser.id } });
+    const tehnicki = await tx.profileTehnicki.findMany({ where: { userId: demoUser.id } });
+    const okovi = await tx.okov.findMany({ where: { userId: demoUser.id } });
+    const ispune = await tx.ispuna.findMany({ where: { userId: demoUser.id } });
+    const profili = await tx.profil.findMany({ where: { userId: demoUser.id } });
+    const valute = await tx.valuta.findMany({ where: { userId: demoUser.id } });
+    const settings = await tx.setting.findMany({ where: { userId: demoUser.id } });
+    const roletne = await tx.roletna.findMany({ where: { userId: demoUser.id } });
+    const komarnici = await tx.komarnik.findMany({ where: { userId: demoUser.id } });
+    const dodatniElementi = await tx.dodatniElement.findMany({ where: { userId: demoUser.id } });
+
+    // 4. Kopiranje parametara i cena kod novog korisnika
+    if (prices.length > 0) {
+      await tx.profilePrice.createMany({
+        data: prices.map(({ id, ...x }) => ({
+          ...x,
+          userId: targetUserId,
+        })),
+      });
+    }
+
+    if (tehnicki.length > 0) {
+      await tx.profileTehnicki.createMany({
+        data: tehnicki.map(({ id, ...x }) => ({
+          ...x,
+          userId: targetUserId,
+        })),
+      });
+    }
+
+    if (okovi.length > 0) {
+      await tx.okov.createMany({
+        data: okovi.map(({ id, ...x }) => ({
+          ...x,
+          userId: targetUserId,
+        })),
+      });
+    }
+
+    if (ispune.length > 0) {
+      await tx.ispuna.createMany({
+        data: ispune.map(({ id, ...x }) => ({
+          ...x,
+          userId: targetUserId,
+        })),
+      });
+    }
+
+    if (profili.length > 0) {
+      await tx.profil.createMany({
+        data: profili.map(({ id, ...x }) => ({
+          ...x,
+          userId: targetUserId,
+        })),
+      });
+    }
+
+    if (valute.length > 0) {
+      await tx.valuta.createMany({
+        data: valute.map(({ id, ...x }) => ({
+          ...x,
+          userId: targetUserId,
+        })),
+      });
+    }
+
+    if (settings.length > 0) {
+      await tx.setting.createMany({
+        data: settings.map(({ id, ...x }) => ({
+          ...x,
+          userId: targetUserId,
+        })),
+      });
+    }
+
+    if (roletne.length > 0) {
+      await tx.roletna.createMany({
+        data: roletne.map(({ id, ...x }) => ({
+          ...x,
+          userId: targetUserId,
+        })),
+      });
+    }
+
+    if (komarnici.length > 0) {
+      await tx.komarnik.createMany({
+        data: komarnici.map(({ id, ...x }) => ({
+          ...x,
+          userId: targetUserId,
+        })),
+      });
+    }
+
+    if (dodatniElementi.length > 0) {
+      await tx.dodatniElement.createMany({
+        data: dodatniElementi.map(({ id, ...x }) => ({
+          ...x,
+          userId: targetUserId,
+        })),
+      });
+    }
+
+    // 5. Kopiranje DEMO ponuda
+    const demoOffers = await tx.offer.findMany({
+      where: {
+        userId: demoUser.id,
+        deleted: false,
+      },
+      include: {
+        items: true,
+        extraItems: true,
+      },
+      orderBy: {
+        id: 'asc',
+      },
+    });
+
+    for (const offer of demoOffers) {
+      const { id, items, extraItems, ...offerData } = offer;
+
+      const newOffer = await tx.offer.create({
+        data: {
+          ...offerData,
+          userId: targetUserId,
+          deleted: false,
+        },
+      });
+
+      if (items.length > 0) {
+        await tx.offerItem.createMany({
+          data: items.map(({ id, offerId, ...item }) => ({
+            ...item,
+            offerId: newOffer.id,
+          })),
+        });
+      }
+
+      if (extraItems.length > 0) {
+        await tx.offerExtraItem.createMany({
+          data: extraItems.map(({ id, offerId, ...item }) => ({
+            ...item,
+            offerId: newOffer.id,
+          })),
+        });
+      }
+    }
+  });
+
+  await this.audit.log(
+    'ADMIN',
+    'COPY_DEMO_DATA',
+    `Kopirani DEMO podaci korisniku: ${targetUser.username}`,
+    targetUserId,
+  );
+
+  return { success: true };
+}
+
+
+
 }

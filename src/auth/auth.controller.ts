@@ -74,5 +74,11 @@ restoreUser(@Body() body: any) {
   return this.service.restoreUser(Number(body.id));
 }
 
+@Post('users/copy-demo-data')
+copyDemoDataToUser(@Body() body: any) {
+  return this.service.copyDemoDataToUser(Number(body.userId));
+}
+
+
 
 }
