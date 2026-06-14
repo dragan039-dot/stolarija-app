@@ -20,6 +20,7 @@ import { KomarnikModule } from './komarnik/komarnik.module';
 import { DodatniElementModule } from './dodatni-element/dodatni-element.module';
 import { SiteRequestsModule } from './site-requests/site-requests.module';
 import { SiteTranslationsModule } from './site-translations/site-translations.module';
+import { LanguagesController } from './languages.controller';
 
 
 @Module({
@@ -57,7 +58,8 @@ JwtModule.register({
     AuditModule
   ],
   controllers: [
-    SettingsController
+    SettingsController,
+    LanguagesController
   ],
   providers: [
     PrismaService
