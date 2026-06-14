@@ -501,22 +501,22 @@ async copyDemoDataToUser(targetUserId: number) {
       Prvo kopiramo profile i pravimo mapu:
       DEMO profil ID -> novi profil ID korisnika
     */
-    const profilIdMap = new Map<string, string>();
+const profilIdMap = new Map<string, string>();
 
-    for (const p of profili) {
-      const createdProfil = await tx.profil.create({
-        data: {
-          userId: targetUserId,
-          naziv: p.naziv,
-        },
-      });
+for (const p of profili) {
+  const createdProfil = await tx.profil.create({
+    data: {
+      userId: targetUserId,
+      naziv: p.naziv,
+    },
+  });
 
-      profilIdMap.set(String(p.id), String(createdProfil.id));
-    }
+  profilIdMap.set(String(p.id), String(createdProfil.id));
+}
 
-    const normalizeProfil = (oldProfil: any) => {
-      return profilIdMap.get(String(oldProfil)) || String(oldProfil);
-    };
+const normalizeProfil = (oldProfil: any) => {
+  return profilIdMap.get(String(oldProfil)) || String(oldProfil);
+};
 
     for (const p of prices) {
       await tx.profilePrice.create({
