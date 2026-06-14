@@ -496,11 +496,6 @@ async copyDemoDataToUser(targetUserId: number) {
       where: { userId: demoUser.id },
     });
 
-    /*
-      VAŽNO:
-      Prvo kopiramo profile i pravimo mapu:
-      DEMO profil ID -> novi profil ID korisnika
-    */
     const profilIdMap = new Map<string, string>();
 
     for (const p of profili) {
@@ -667,7 +662,7 @@ async copyDemoDataToUser(targetUserId: number) {
 
   return { success: true };
 }
-
+dragan
 
 
 
