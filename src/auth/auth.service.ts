@@ -455,34 +455,68 @@ async copyDemoDataToUser(targetUserId: number) {
     await tx.komarnik.deleteMany({ where: { userId: targetUserId } });
     await tx.dodatniElement.deleteMany({ where: { userId: targetUserId } });
 
-    const prices = await tx.profilePrice.findMany({ where: { userId: demoUser.id } });
-    const tehnicki = await tx.profileTehnicki.findMany({ where: { userId: demoUser.id } });
-    const okovi = await tx.okov.findMany({ where: { userId: demoUser.id } });
-    const ispune = await tx.ispuna.findMany({ where: { userId: demoUser.id } });
-    const profili = await tx.profil.findMany({ where: { userId: demoUser.id }, orderBy: { id: 'asc' } });
-const profilMap = new Map<string, string>();
+    const prices = await tx.profilePrice.findMany({
+      where: { userId: demoUser.id },
+    });
 
-profili.forEach((p, index) => {
-  profilMap.set(String(p.id), String(index + 1));
-  profilMap.set(String(index + 1), String(index + 1));
-});
+    const tehnicki = await tx.profileTehnicki.findMany({
+      where: { userId: demoUser.id },
+    });
 
-const normalizeProfil = (profil: any) => {
-  const raw = String(profil);
+    const okovi = await tx.okov.findMany({
+      where: { userId: demoUser.id },
+    });
 
-  const foundIndex = profili.findIndex((p) => String(p.id) === raw);
+    const ispune = await tx.ispuna.findMany({
+      where: { userId: demoUser.id },
+    });
 
-  if (foundIndex >= 0) {
-    return String(foundIndex + 1);
-  }
+    const profili = await tx.profil.findMany({
+      where: { userId: demoUser.id },
+      orderBy: { id: 'asc' },
+    });
 
-  return raw;
-};
-    const valute = await tx.valuta.findMany({ where: { userId: demoUser.id } });
-    const settings = await tx.setting.findMany({ where: { userId: demoUser.id } });
-    const roletne = await tx.roletna.findMany({ where: { userId: demoUser.id } });
-    const komarnici = await tx.komarnik.findMany({ where: { userId: demoUser.id } });
-    const dodatniElementi = await tx.dodatniElement.findMany({ where: { userId: demoUser.id } });
+    const valute = await tx.valuta.findMany({
+      where: { userId: demoUser.id },
+    });
+
+    const settings = await tx.setting.findMany({
+      where: { userId: demoUser.id },
+    });
+
+    const roletne = await tx.roletna.findMany({
+      where: { userId: demoUser.id },
+    });
+
+    const komarnici = await tx.komarnik.findMany({
+      where: { userId: demoUser.id },
+    });
+
+    const dodatniElementi = await tx.dodatniElement.findMany({
+      where: { userId: demoUser.id },
+    });
+
+    /*
+      VAŽNO:
+      Prvo kopiramo profile i pravimo mapu:
+      DEMO profil ID -> novi profil ID korisnika
+    */
+    const profilIdMap = new Map<string, string>();
+
+    for (const p of profili) {
+      const createdProfil = await tx.profil.create({
+        data: {
+          userId: targetUserId,
+          naziv: p.naziv,
+        },
+      });
+
+      profilIdMap.set(String(p.id), String(createdProfil.id));
+    }
+
+    const normalizeProfil = (oldProfil: any) => {
+      return profilIdMap.get(String(oldProfil)) || String(oldProfil);
+    };
 
     for (const p of prices) {
       await tx.profilePrice.create({
@@ -522,15 +556,6 @@ const normalizeProfil = (profil: any) => {
           userId: targetUserId,
           naziv: i.naziv,
           cena: i.cena,
-        },
-      });
-    }
-
-    for (const p of profili) {
-      await tx.profil.create({
-        data: {
-          userId: targetUserId,
-          naziv: p.naziv,
         },
       });
     }
