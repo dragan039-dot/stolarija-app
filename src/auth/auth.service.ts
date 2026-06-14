@@ -632,12 +632,13 @@ async copyDemoDataToUser(targetUserId: number) {
       for (const item of items) {
         const { id, offerId, ...itemData } = item;
 
-        await tx.offerItem.create({
-          data: {
-            ...itemData,
-            offerId: newOffer.id,
-          },
-        });
+await tx.offerItem.create({
+  data: {
+    ...itemData,
+    offerId: newOffer.id,
+    profil: normalizeProfil(itemData.profil),
+  },
+});
       }
 
       for (const extra of extraItems) {
@@ -662,8 +663,6 @@ async copyDemoDataToUser(targetUserId: number) {
 
   return { success: true };
 }
-dragan
-
 
 
 }
