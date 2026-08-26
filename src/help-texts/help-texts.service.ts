@@ -5,10 +5,13 @@ import { PrismaService } from '../prisma.service';
 export class HelpTextsService {
   constructor(private prisma: PrismaService) {}
 
-  getAll() {
+  async getAll() {
     return this.prisma.helpText.findMany({
       orderBy: {
         fieldName: 'asc',
+      },
+      include: {
+        language: true,
       },
     });
   }
@@ -21,20 +24,42 @@ export class HelpTextsService {
     for (const item of data) {
       if (!item.fieldName) continue;
 
-      await this.prisma.helpText.upsert({
+      const languageId =
+        item.languageId === null ||
+        item.languageId === undefined ||
+        item.languageId === ''
+          ? null
+          : Number(item.languageId);
+
+      const existing = await this.prisma.helpText.findFirst({
         where: {
           fieldName: item.fieldName,
-        },
-        update: {
-          text: item.text || '',
-        },
-        create: {
-          fieldName: item.fieldName,
-          text: item.text || '',
+          languageId: languageId,
         },
       });
+
+      if (existing) {
+        await this.prisma.helpText.update({
+          where: {
+            id: existing.id,
+          },
+          data: {
+            text: item.text || '',
+          },
+        });
+      } else {
+        await this.prisma.helpText.create({
+          data: {
+            fieldName: item.fieldName,
+            text: item.text || '',
+            languageId: languageId,
+          },
+        });
+      }
     }
 
-    return { success: true };
+    return {
+      success: true,
+    };
   }
 }

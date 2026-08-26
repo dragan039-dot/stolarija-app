@@ -406,9 +406,7 @@ async copyDemoDataToUser(targetUserId: number) {
     where: { username: 'DEMO' },
   });
 
-  if (!demoUser) {
-    throw new BadRequestException('DEMO korisnik ne postoji');
-  }
+  if (!demoUser) throw new BadRequestException('DEMO korisnik ne postoji');
 
   if (demoUser.id === targetUserId) {
     throw new BadRequestException('Ne možete kopirati DEMO podatke u DEMO korisnika');
@@ -418,9 +416,7 @@ async copyDemoDataToUser(targetUserId: number) {
     where: { id: targetUserId },
   });
 
-  if (!targetUser) {
-    throw new BadRequestException('Korisnik ne postoji');
-  }
+  if (!targetUser) throw new BadRequestException('Korisnik ne postoji');
 
   await this.prisma.$transaction(async (tx) => {
     const oldOffers = await tx.offer.findMany({
@@ -431,17 +427,9 @@ async copyDemoDataToUser(targetUserId: number) {
     const oldOfferIds = oldOffers.map((x) => x.id);
 
     if (oldOfferIds.length > 0) {
-      await tx.offerExtraItem.deleteMany({
-        where: { offerId: { in: oldOfferIds } },
-      });
-
-      await tx.offerItem.deleteMany({
-        where: { offerId: { in: oldOfferIds } },
-      });
-
-      await tx.offer.deleteMany({
-        where: { userId: targetUserId },
-      });
+      await tx.offerExtraItem.deleteMany({ where: { offerId: { in: oldOfferIds } } });
+      await tx.offerItem.deleteMany({ where: { offerId: { in: oldOfferIds } } });
+      await tx.offer.deleteMany({ where: { userId: targetUserId } });
     }
 
     await tx.profilePrice.deleteMany({ where: { userId: targetUserId } });
@@ -455,63 +443,60 @@ async copyDemoDataToUser(targetUserId: number) {
     await tx.komarnik.deleteMany({ where: { userId: targetUserId } });
     await tx.dodatniElement.deleteMany({ where: { userId: targetUserId } });
 
-    const prices = await tx.profilePrice.findMany({
-      where: { userId: demoUser.id },
-    });
-
-    const tehnicki = await tx.profileTehnicki.findMany({
-      where: { userId: demoUser.id },
-    });
-
-    const okovi = await tx.okov.findMany({
-      where: { userId: demoUser.id },
-    });
-
-    const ispune = await tx.ispuna.findMany({
-      where: { userId: demoUser.id },
-    });
-
+    const prices = await tx.profilePrice.findMany({ where: { userId: demoUser.id } });
+    const tehnicki = await tx.profileTehnicki.findMany({ where: { userId: demoUser.id } });
+    const okovi = await tx.okov.findMany({ where: { userId: demoUser.id } });
+    const ispune = await tx.ispuna.findMany({ where: { userId: demoUser.id } });
     const profili = await tx.profil.findMany({
       where: { userId: demoUser.id },
       orderBy: { id: 'asc' },
     });
+    const valute = await tx.valuta.findMany({ where: { userId: demoUser.id } });
+    const settings = await tx.setting.findMany({ where: { userId: demoUser.id } });
+const roletne = await tx.roletna.findMany({
+  where: { userId: demoUser.id },
+  orderBy: { id: 'asc' },
+});
 
-    const valute = await tx.valuta.findMany({
-      where: { userId: demoUser.id },
-    });
-
-    const settings = await tx.setting.findMany({
-      where: { userId: demoUser.id },
-    });
-
-    const roletne = await tx.roletna.findMany({
-      where: { userId: demoUser.id },
-    });
-
-    const komarnici = await tx.komarnik.findMany({
-      where: { userId: demoUser.id },
-    });
-
-    const dodatniElementi = await tx.dodatniElement.findMany({
-      where: { userId: demoUser.id },
-    });
+const komarnici = await tx.komarnik.findMany({
+  where: { userId: demoUser.id },
+  orderBy: { id: 'asc' },
+});
+const dodatniElementi = await tx.dodatniElement.findMany({
+  where: { userId: demoUser.id },
+  orderBy: { id: 'asc' },
+});
 
     const profilIdMap = new Map<string, string>();
+    const ispunaIdMap = new Map<string, string>();
+    const okovIdMap = new Map<string, string>();
+const valutaIdMap = new Map<string, string>();
+
 
     for (const p of profili) {
-      const createdProfil = await tx.profil.create({
-        data: {
-          userId: targetUserId,
-          naziv: p.naziv,
-        },
+      const created = await tx.profil.create({
+        data: { userId: targetUserId, naziv: p.naziv },
       });
-
-      profilIdMap.set(String(p.id), String(createdProfil.id));
+      profilIdMap.set(String(p.id), String(created.id));
     }
 
-    const normalizeProfil = (oldProfil: any) => {
-      return profilIdMap.get(String(oldProfil)) || String(oldProfil);
-    };
+    for (const i of ispune) {
+      const created = await tx.ispuna.create({
+        data: { userId: targetUserId, naziv: i.naziv, cena: i.cena },
+      });
+      ispunaIdMap.set(String(i.id), String(created.id));
+    }
+
+    for (const o of okovi) {
+      const created = await tx.okov.create({
+        data: { userId: targetUserId, naziv: o.naziv, cena: o.cena },
+      });
+      okovIdMap.set(String(o.id), String(created.id));
+    }
+
+    const normalizeProfil = (x: any) => profilIdMap.get(String(x)) || x;
+    const normalizeIspuna = (x: any) => ispunaIdMap.get(String(x)) || x;
+    const normalizeOkov = (x: any) => okovIdMap.get(String(x)) || x;
 
     for (const p of prices) {
       await tx.profilePrice.create({
@@ -535,110 +520,73 @@ async copyDemoDataToUser(targetUserId: number) {
       });
     }
 
-    for (const o of okovi) {
-      await tx.okov.create({
-        data: {
-          userId: targetUserId,
-          naziv: o.naziv,
-          cena: o.cena,
-        },
-      });
-    }
+for (const v of valute) {
+  const createdValuta = await tx.valuta.create({
+    data: {
+      userId: targetUserId,
+      naziv: v.naziv,
+    },
+  });
 
-    for (const i of ispune) {
-      await tx.ispuna.create({
-        data: {
-          userId: targetUserId,
-          naziv: i.naziv,
-          cena: i.cena,
-        },
-      });
-    }
-
-    for (const v of valute) {
-      await tx.valuta.create({
-        data: {
-          userId: targetUserId,
-          naziv: v.naziv,
-        },
-      });
-    }
+  valutaIdMap.set(String(v.id), String(createdValuta.id));
+}
 
     for (const s of settings) {
       await tx.setting.create({
-        data: {
-          userId: targetUserId,
-          key: s.key,
-          value: s.value,
-        },
+        data: { userId: targetUserId, key: s.key, value: s.value },
       });
     }
 
     for (const r of roletne) {
       await tx.roletna.create({
-        data: {
-          userId: targetUserId,
-          naziv: r.naziv,
-          cena: r.cena,
-        },
+        data: { userId: targetUserId, naziv: r.naziv, cena: r.cena },
       });
     }
 
     for (const k of komarnici) {
       await tx.komarnik.create({
-        data: {
-          userId: targetUserId,
-          naziv: k.naziv,
-          cena: k.cena,
-        },
+        data: { userId: targetUserId, naziv: k.naziv, cena: k.cena },
       });
     }
 
     for (const d of dodatniElementi) {
       await tx.dodatniElement.create({
-        data: {
-          userId: targetUserId,
-          naziv: d.naziv,
-          cena: d.cena,
-        },
+        data: { userId: targetUserId, naziv: d.naziv, cena: d.cena },
       });
     }
 
     const demoOffers = await tx.offer.findMany({
-      where: {
-        userId: demoUser.id,
-        deleted: false,
-      },
-      include: {
-        items: true,
-        extraItems: true,
-      },
-      orderBy: {
-        id: 'asc',
-      },
+      where: { userId: demoUser.id, deleted: false },
+      include: { items: true, extraItems: true },
+      orderBy: { id: 'asc' },
     });
 
     for (const offer of demoOffers) {
       const { id, items, extraItems, ...offerData } = offer;
 
-      const newOffer = await tx.offer.create({
-        data: {
-          ...offerData,
-          userId: targetUserId,
-          deleted: false,
-        },
-      });
+const newOffer = await tx.offer.create({
+  data: {
+    ...offerData,
+    userId: targetUserId,
+    valuta:
+      valutaIdMap.get(String(offerData.valuta)) ||
+      offerData.valuta,
+    deleted: false,
+  },
+});
 
       for (const item of items) {
         const { id, offerId, ...itemData } = item;
 
-await tx.offerItem.create({
-  data: {
-    ...itemData,
-    offerId: newOffer.id,
-    profil: normalizeProfil(itemData.profil),
-  },
-});
+        await tx.offerItem.create({
+          data: {
+            ...itemData,
+            offerId: newOffer.id,
+            profil: normalizeProfil(itemData.profil),
+            ispuna: normalizeIspuna(itemData.ispuna),
+            okov: normalizeOkov(itemData.okov),
+          },
+        });
       }
 
       for (const extra of extraItems) {
@@ -663,6 +611,5 @@ await tx.offerItem.create({
 
   return { success: true };
 }
-
 
 }

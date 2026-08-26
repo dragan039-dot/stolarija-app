@@ -16,32 +16,38 @@ export class OkovService {
     });
   }
 
-  async save(data: any[]) {
-    if (!Array.isArray(data) || data.length === 0) {
-      return { success: true };
-    }
+async save(data: any[]) {
+  if (!Array.isArray(data) || data.length === 0) {
+    return { success: true };
+  }
 
-    const userId = Number(data[0].userId);
+  const userId = Number(data[0].userId);
 
-    await this.prisma.okov.deleteMany({
-      where: {
-        userId,
-      },
-    });
+  for (let i = 0; i < data.length; i++) {
+    const item = data[i];
 
-    for (let i = 0; i < data.length; i++) {
-      const item = data[i];
-
+    if (item.id) {
+      await this.prisma.okov.update({
+        where: {
+          id: Number(item.id),
+        },
+        data: {
+          naziv: item.naziv || `Okov ${i + 1}`,
+          cena: Number(item.cena) || 0,
+        },
+      });
+    } else {
       await this.prisma.okov.create({
         data: {
           userId,
-
           naziv: item.naziv || `Okov ${i + 1}`,
           cena: Number(item.cena) || 0,
         },
       });
     }
-
-    return { success: true };
   }
+
+  return { success: true };
+}
+
 }

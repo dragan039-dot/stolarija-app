@@ -11,26 +11,37 @@ export class AdsService {
     });
   }
 
-  async saveMany(data: any[]) {
-    if (!Array.isArray(data)) {
-      return { success: false };
-    }
-
-    for (const item of data) {
-      if (!item.key) continue;
-
-      await this.prisma.adSetting.upsert({
-        where: { key: item.key },
-        update: { value: item.value || '' },
-        create: {
-          key: item.key,
-          value: item.value || '',
-        },
-      });
-    }
-
-    return { success: true };
+async saveMany(data: any[]) {
+  if (!Array.isArray(data)) {
+    return { success: false };
   }
+
+  for (const item of data) {
+    if (!item.key) continue;
+
+    const existing = await this.prisma.adSetting.findUnique({
+      where: { key: item.key },
+    });
+
+    const incomingValue =
+      item.value === undefined || item.value === null
+        ? existing?.value || ''
+        : String(item.value);
+
+    await this.prisma.adSetting.upsert({
+      where: { key: item.key },
+      update: {
+        value: incomingValue,
+      },
+      create: {
+        key: item.key,
+        value: incomingValue,
+      },
+    });
+  }
+
+  return { success: true };
+}
 
 
 async registerClick(adKey: string) {

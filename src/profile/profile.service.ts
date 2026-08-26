@@ -301,32 +301,33 @@ async saveProfiles(data: any[]) {
   });
 }
 
-  async saveValute(data: any[]) {
-  if (!Array.isArray(data)) {
-    throw new Error('Valuta mora biti niz');
-  }
-
-  if (data.length === 0) {
+async saveValute(data: any[]) {
+  if (!Array.isArray(data) || data.length === 0) {
     return { success: true };
   }
 
   const userId = Number(data[0].userId);
 
-  await this.prisma.valuta.deleteMany({
-    where: { userId },
-  });
-
   for (let i = 0; i < data.length; i++) {
-    const v = data[i];
+    const item = data[i];
 
-    if (!v?.naziv) continue;
-
-    await this.prisma.valuta.create({
-      data: {
-        userId,
-        naziv: v.naziv,
-      },
-    });
+    if (item.id) {
+      await this.prisma.valuta.update({
+        where: {
+          id: Number(item.id),
+        },
+        data: {
+          naziv: item.naziv || `Valuta ${i + 1}`,
+        },
+      });
+    } else {
+      await this.prisma.valuta.create({
+        data: {
+          userId,
+          naziv: item.naziv || `Valuta ${i + 1}`,
+        },
+      });
+    }
   }
 
   return { success: true };
@@ -372,10 +373,7 @@ async saveProfiles(data: any[]) {
   // ---------------- FORMULE ----------------
 
   getFormula(vrstaStolarije: string, vrstaProzora: string) {
-  console.log("GET FORMULA:", {
-    vrstaStolarije,
-    vrstaProzora,
-  });
+
 
   if (!vrstaStolarije || !vrstaProzora) {
     return [];
@@ -661,21 +659,7 @@ const kom =
     (1 + otpad / 100) *
     (1 + zarada / 100);
 
-console.log("------ UKUPNA CENA DEBUG ------");
-console.log("Roletna:", roletnaCena);
-console.log("Komarnik:", komarnikCena);
-console.log("Zbir ostalih:", zbirOstalih);
-console.log("Plastika:", plastika);
-console.log("Okov:", okov);
-console.log("Otpad %:", otpad);
-console.log("Zarada %:", zarada);
 
-console.log(
-  "Formula:",
-  `(${komarnikCena} + ${roletnaCena}) + (${zbirOstalih} + ${plastika} + ${okov}) * (1 + ${otpad}/100) * (1 + ${zarada}/100)`
-);
-
-console.log("UKUPNO =", ukupnaCena);
 
 results.push({
   element: "Ukupna cena",
