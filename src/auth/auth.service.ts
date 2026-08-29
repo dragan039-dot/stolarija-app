@@ -57,23 +57,23 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Pogrešno korisničko ime ili šifra');
+      throw new UnauthorizedException('Incorrect username or password');
     }
 
     if (!user.isActive) {
-      throw new UnauthorizedException('Korisnik nije aktivan');
+      throw new UnauthorizedException('User is inactive.');
     }
 
     if (user.licenseEnd && new Date(user.licenseEnd) < new Date()) {
       throw new UnauthorizedException(
-        'Licenca je istekla. Kontaktirajte administratora.',
+        'The license has expired. Please contact your administrator.',
       );
     }
 
     const ok = await bcrypt.compare(data.password, user.password);
 
     if (!ok) {
-      throw new UnauthorizedException('Pogrešno korisničko ime ili šifra');
+      throw new UnauthorizedException('Incorrect username or password');
     }
 
     const fingerprint = data.fingerprint || '';
@@ -94,7 +94,7 @@ export class AuthService {
 
       if (deviceCount >= user.maxDevices) {
         throw new UnauthorizedException(
-          'Dostignut maksimalan broj uređaja za prijavu.',
+          'Maximum number of logged-in devices reached.',
         );
       }
 
@@ -106,7 +106,7 @@ export class AuthService {
       });
     }
 
-    await this.audit.log(user.username, 'LOGIN', 'Uspešna prijava', user.id);
+    await this.audit.log(user.username, 'LOGIN', 'Login successful.', user.id);
 
     const token = await this.jwt.signAsync({
       id: user.id,
@@ -153,7 +153,7 @@ async getUsers() {
 
   async createUser(data: any) {
     if (!data.username || !data.username.trim()) {
-      throw new BadRequestException('Unesite korisničko ime');
+      throw new BadRequestException('Enter username');
     }
 
     const exists = await this.prisma.user.findUnique({
@@ -218,7 +218,7 @@ defaultLanguageId:
     const ok = await bcrypt.compare(data.oldPassword, user.password);
 
     if (!ok) {
-      throw new BadRequestException('Stara šifra nije tačna');
+      throw new BadRequestException('Incorrect old password.');
     }
 
     const hashed = await bcrypt.hash(data.newPassword, 10);
