@@ -75,6 +75,11 @@ export class ProfileController {
     return this.service.calculatePVC19(body);
   }
 
+@Get('formula-overview')
+getFormulaOverview() {
+  return this.service.getFormulaOverview();
+}
+
   @Get('formula')
   getFormula(
     @Query('vrstaStolarije') vrstaStolarije: string,

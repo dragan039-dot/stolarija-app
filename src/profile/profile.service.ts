@@ -372,6 +372,25 @@ async saveValute(data: any[]) {
 
   // ---------------- FORMULE ----------------
 
+async getFormulaOverview() {
+  return this.prisma.formulaDefinition.findMany({
+    select: {
+      vrstaStolarije: true,
+      vrstaProzora: true,
+      element: true,
+      s: true,
+      v: true,
+      cena: true,
+      redosled: true,
+    },
+    orderBy: [
+      { vrstaProzora: 'asc' },
+      { vrstaStolarije: 'asc' },
+      { redosled: 'asc' },
+    ],
+  });
+}
+
   getFormula(vrstaStolarije: string, vrstaProzora: string) {
 
 
