@@ -15,8 +15,8 @@ await NestFactory.create<NestExpressApplication>(
   AppModule
 );
 
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ limit: '5mb', extended: true }));
+app.use(express.json({ limit: '55mb' }));
+app.use(express.urlencoded({ limit: '55mb', extended: true }));
 
   // DOZVOLJAVAMO FRONTEND SA 3000 PORTA
   app.enableCors({
