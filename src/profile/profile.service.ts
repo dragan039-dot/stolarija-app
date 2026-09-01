@@ -739,12 +739,71 @@ results.push({
 
 
 
+const nabavnaRoletna =
+  results.find((x) => x.element === "Roletna")?.nabavnaCena || 0;
+
+const nabavniKomarnik =
+  results.find((x) => x.element === "Komarnik")?.nabavnaCena || 0;
+
+const zbirNabavnihOstalih = results
+  .filter(
+    (x) =>
+      x.element !== "Roletna" &&
+      x.element !== "Komarnik" &&
+      x.element !== "Ukupna cena"
+  )
+  .reduce(
+    (sum, x) => sum + (Number(x.nabavnaCena) || 0),
+    0
+  );
+
+const nabavnaOsnova =
+  zbirNabavnihOstalih +
+  plastika +
+  okov;
+
+const iznosOtpada =
+  nabavnaOsnova * (otpad / 100);
+
+const nabavnaSaOtpadom =
+  nabavnaOsnova + iznosOtpada;
+
+const iznosZarade =
+  nabavnaSaOtpadom * (zarada / 100);
+
+const ukupnaNabavna =
+  nabavnaSaOtpadom +
+  Number(nabavnaRoletna) +
+  Number(nabavniKomarnik);
+
+const ukupnaZarada =
+  ukupnaCena - ukupnaNabavna;
+
+
+
 results.push({
   element: "Ukupna cena",
   S: 0,
   V: 0,
   kom: 1,
+
   cena: Number(ukupnaCena.toFixed(2)),
+
+  nabavnaOsnova: Number(nabavnaOsnova.toFixed(2)),
+  iznosOtpada: Number(iznosOtpada.toFixed(2)),
+  nabavnaSaOtpadom: Number(nabavnaSaOtpadom.toFixed(2)),
+
+  nabavnaRoletna: Number(Number(nabavnaRoletna).toFixed(2)),
+  prodajnaRoletna: Number(Number(roletnaCena).toFixed(2)),
+
+  nabavniKomarnik: Number(Number(nabavniKomarnik).toFixed(2)),
+  prodajniKomarnik: Number(Number(komarnikCena).toFixed(2)),
+
+  iznosZarade: Number(iznosZarade.toFixed(2)),
+
+  ukupnaNabavna: Number(ukupnaNabavna.toFixed(2)),
+  ukupnaProdajna: Number(ukupnaCena.toFixed(2)),
+  ukupnaZarada: Number(ukupnaZarada.toFixed(2)),
 });
 
   return results;
