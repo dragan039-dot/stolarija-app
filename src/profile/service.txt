@@ -69,13 +69,18 @@ export class ProfileService {
     }
   }
 
-  private async buildCtx(input: any, isPreview = false) {
+  private async buildCtx(
+  input: any,
+  userId: number,
+  isPreview = false,
+) {
     const ctx: Record<string, number> = {};
 
     this.setCtxValue(ctx, 'A', Number(input.A) || (isPreview ? 1000 : 0));
     this.setCtxValue(ctx, 'B', Number(input.B) || (isPreview ? 1000 : 0));
     this.setCtxValue(ctx, 'C', Number(input.C) || 0);
     this.setCtxValue(ctx, 'D', Number(input.D) || (isPreview ? 500 : 0));
+    this.setCtxValue(ctx, 'E', Number(input.E) || 0);
 
     // iz frontenda
     Object.entries(input.tehnicki || {}).forEach(([key, value]) => {
@@ -87,14 +92,22 @@ export class ProfileService {
     });
 
     // dodatni podaci iz baze kao fallback
-    const dbTehnicki = await this.prisma.profileTehnicki.findMany();
+    const dbTehnicki = await this.prisma.profileTehnicki.findMany({
+  where: {
+    userId,
+  },
+});
     for (const t of dbTehnicki) {
       if (!(t.element in ctx) && !(this.normalizeKey(t.element) in ctx)) {
         this.setCtxValue(ctx, t.element, Number(t.vrednost) || 0);
       }
     }
 
-    const dbPrices = await this.prisma.profilePrice.findMany();
+    const dbPrices = await this.prisma.profilePrice.findMany({
+  where: {
+    userId,
+  },
+});
     for (const c of dbPrices) {
       const key = `${c.element} Cena`;
       if (!(key in ctx) && !(this.normalizeKey(key) in ctx)) {
@@ -125,9 +138,28 @@ this.setCtxValue(ctx, "ZARADA_PROCENAT", Number(input.firma?.zarada) || 0);
 
 
     // posebne cene
-    this.setCtxValue(ctx, 'Ispuna Cena', Number(input.ispunaCena) || 0);
-    this.setCtxValue(ctx, 'OKOV', Number(input.okovCena) || 0);
-    this.setCtxValue(ctx, 'PLASTIKA', Number(input.plastikaCena) || 0);
+this.setCtxValue(ctx, 'Ispuna Cena', Number(input.ispunaCena) || 0);
+this.setCtxValue(ctx, 'OKOV', Number(input.okovCena) || 0);
+this.setCtxValue(ctx, 'PLASTIKA', Number(input.plastikaCena) || 0);
+
+// NOVE CENE
+this.setCtxValue(
+  ctx,
+  'Roletna Cena',
+  Number(input.roletnaCena) || 0
+);
+
+this.setCtxValue(
+  ctx,
+  'Komarnik Cena',
+  Number(input.komarnikCena) || 0
+);
+
+this.setCtxValue(
+  ctx,
+  'DodElement Cena',
+  Number(input.dodatniElementCena) || 0
+);
 
     // uslovi 0 / 1
     this.setCtxValue(ctx, 'RoletnaTip', Number(input.roletnaTip) || 0);
@@ -135,6 +167,16 @@ this.setCtxValue(ctx, "ZARADA_PROCENAT", Number(input.firma?.zarada) || 0);
     this.setCtxValue(ctx, 'ImaKomarnik', Number(input.imaKomarnik) || 0);
     this.setCtxValue(ctx, 'ImaOkov', Number(input.imaOkov) || 0);
     this.setCtxValue(ctx, 'ImaIspunu', Number(input.imaIspunu) || 0);
+const imaTpreckaValue =
+  Number(input.E) > 1 ? 1 : 0;
+
+this.setCtxValue(ctx, 'ImaTprecka', imaTpreckaValue);
+this.setCtxValue(ctx, 'ImaTprečka', imaTpreckaValue);
+this.setCtxValue(ctx, 'imatprecka', imaTpreckaValue);
+
+
+
+this.setCtxValue(ctx, 'E', Number(input.E) || 0);
 
     return ctx;
   }
@@ -171,126 +213,191 @@ this.setCtxValue(ctx, "ZARADA_PROCENAT", Number(input.firma?.zarada) || 0);
 
   // ---------------- PRICES ----------------
 
-  getPrices() {
-    return this.prisma.profilePrice.findMany();
-  }
+  getPrices(userId: number) {
+  return this.prisma.profilePrice.findMany({
+    where: { userId },
+    orderBy: { id: 'asc' },
+  });
+}
 
-  async savePrice(data: any) {
-    const exists = await this.prisma.profilePrice.findFirst({
-      where: {
-        profil: data.profil,
+async savePrice(data: any) {
+  return this.prisma.profilePrice.upsert({
+    where: {
+      price_user_profil_element: {
+        userId: Number(data.userId),
+        profil: String(data.profil),
         element: data.element,
       },
-    });
+    },
 
-    if (exists) {
-      return this.prisma.profilePrice.update({
-        where: { id: exists.id },
-        data: { cena: Number(data.cena) },
-      });
-    }
+    update: {
+      cena: Number(data.cena) || 0,
+    },
 
-    return this.prisma.profilePrice.create({
-      data: {
-        profil: data.profil,
-        element: data.element,
-        cena: Number(data.cena),
-      },
-    });
-  }
-
+    create: {
+      userId: Number(data.userId),
+      profil: String(data.profil),
+      element: data.element,
+      cena: Number(data.cena) || 0,
+    },
+  });
+}
   // ---------------- PROFILI ----------------
 
-  async getProfiles() {
-    return this.prisma.profil.findMany({
-      orderBy: { id: 'asc' },
-    });
+  async getProfiles(userId: number) {
+  return this.prisma.profil.findMany({
+    where: { userId },
+    orderBy: { id: 'asc' },
+  });
+}
+
+async saveProfiles(data: any[]) {
+  if (!Array.isArray(data) || data.length === 0) {
+    return { success: true };
   }
 
-  async saveProfiles(data: any[]) {
-    if (!Array.isArray(data)) {
-      throw new Error('Profili moraju biti niz');
-    }
+  const userId = Number(data[0].userId);
 
-    const validData = data
-      .filter((p) => p && typeof p.naziv === 'string')
-      .map((p, i) => ({
-        id: Number(p.id) || i + 1,
-        naziv: p.naziv.trim() || `Profil ${i + 1}`,
-      }));
+  for (let i = 0; i < data.length; i++) {
+    const p = data[i];
 
-    await this.prisma.profil.deleteMany();
+    const existing = p.id
+      ? await this.prisma.profil.findFirst({
+          where: {
+            id: Number(p.id),
+            userId,
+          },
+        })
+      : null;
 
-    for (const p of validData) {
+    if (existing) {
+      await this.prisma.profil.update({
+        where: { id: existing.id },
+        data: {
+          naziv: p.naziv || `Profil ${i + 1}`,
+        },
+      });
+    } else {
       await this.prisma.profil.create({
         data: {
-          id: p.id,
-          naziv: p.naziv,
+          userId,
+          naziv: p.naziv || `Profil ${i + 1}`,
         },
       });
     }
-
-    return { success: true };
   }
+
+  return { success: true };
+}
 
   // ---------------- VALUTE ----------------
 
-  async getValute() {
-    return this.prisma.valuta.findMany({
-      orderBy: { id: 'asc' },
-    });
-  }
+  async getValute(userId: number) {
+  return this.prisma.valuta.findMany({
+    where: {
+      userId,
+    },
+    orderBy: { id: 'asc' },
+  });
+}
 
-  async saveValute(data: any[]) {
-    if (!Array.isArray(data)) {
-      throw new Error('Valuta mora biti niz');
-    }
-
-    await this.prisma.valuta.deleteMany();
-
-    for (let i = 0; i < data.length; i++) {
-      const v = data[i];
-      if (!v?.naziv) continue;
-
-      await this.prisma.valuta.create({
-        data: {
-          id: Number(v.id) || i + 1,
-          naziv: v.naziv,
-        },
-      });
-    }
-
+async saveValute(data: any[]) {
+  if (!Array.isArray(data) || data.length === 0) {
     return { success: true };
   }
 
+  const userId = Number(data[0].userId);
+
+  for (let i = 0; i < data.length; i++) {
+    const item = data[i];
+
+    if (item.id) {
+      await this.prisma.valuta.update({
+        where: {
+          id: Number(item.id),
+        },
+        data: {
+          naziv: item.naziv || `Valuta ${i + 1}`,
+        },
+      });
+    } else {
+      await this.prisma.valuta.create({
+        data: {
+          userId,
+          naziv: item.naziv || `Valuta ${i + 1}`,
+        },
+      });
+    }
+  }
+
+  return { success: true };
+}
+
   // ---------------- TEHNIČKI ----------------
 
-  async getTehnicki() {
-    return this.prisma.profileTehnicki.findMany();
-  }
+  async getTehnicki(userId: number) {
+  return this.prisma.profileTehnicki.findMany({
+    where: {
+      userId,
+    },
+    orderBy: {
+      id: 'asc',
+    },
+  });
+}
 
   async saveTehnicki(data: any) {
-    return this.prisma.profileTehnicki.upsert({
-      where: {
-        profil_element: {
-          profil: data.profil,
-          element: data.element,
-        },
-      },
-      update: {
-        vrednost: Number(data.vrednost),
-      },
-      create: {
+  return this.prisma.profileTehnicki.upsert({
+    where: {
+      user_profil_element: {
+        userId: Number(data.userId),
         profil: data.profil,
         element: data.element,
-        vrednost: Number(data.vrednost),
       },
-    });
-  }
+    },
+
+    update: {
+      vrednost: Number(data.vrednost),
+    },
+
+    create: {
+      userId: Number(data.userId),
+
+      profil: data.profil,
+      element: data.element,
+      vrednost: Number(data.vrednost),
+    },
+  });
+}
 
   // ---------------- FORMULE ----------------
 
+async getFormulaOverview() {
+  return this.prisma.formulaDefinition.findMany({
+    select: {
+      vrstaStolarije: true,
+      vrstaProzora: true,
+      element: true,
+      s: true,
+      v: true,
+      cena: true,
+      redosled: true,
+    },
+    orderBy: [
+      { vrstaProzora: 'asc' },
+      { vrstaStolarije: 'asc' },
+      { redosled: 'asc' },
+    ],
+  });
+}
+
   getFormula(vrstaStolarije: string, vrstaProzora: string) {
+
+
+  if (!vrstaStolarije || !vrstaProzora) {
+    return [];
+  }
+
   return this.prisma.formulaDefinition.findMany({
     where: {
       vrstaStolarije,
@@ -326,7 +433,10 @@ this.setCtxValue(ctx, "ZARADA_PROCENAT", Number(input.firma?.zarada) || 0);
       element: row.element,
       s: row.s || '',
       v: row.v || '',
-      kom: Number(row.kom) || 1,
+      kom:
+  row.kom === null || row.kom === undefined
+    ? ""
+    : String(row.kom),
       cena: row.cena || '',
       redosled: index + 1,
     })),
@@ -338,7 +448,11 @@ this.setCtxValue(ctx, "ZARADA_PROCENAT", Number(input.firma?.zarada) || 0);
   async previewFormula(body: any) {
   const { formule, input } = body;
 
-  const ctx = await this.buildCtx(input, true);
+  const ctx = await this.buildCtx(
+  input,
+  Number(input.userId),
+  true,
+);
   const results: any[] = [];
 
   for (const f of formule) {
@@ -357,33 +471,41 @@ this.setCtxValue(ctx, "ZARADA_PROCENAT", Number(input.firma?.zarada) || 0);
 const kom =
   rawKom === null || rawKom === undefined || rawKom === ""
     ? 0
-    : Number(rawKom);
+    : isNaN(Number(rawKom))
+      ? evaluateFormula(String(rawKom), ctx)
+      : Number(rawKom);
 
-    this.setCtxValue(ctx, "S", S);
-    this.setCtxValue(ctx, "V", V);
-    this.setCtxValue(ctx, "kom", kom);
+    const cenaCtx: Record<string, number> = {
+      ...ctx,
+      S,
+      V,
+      s: S,
+      v: V,
+      kom,
+      "Kom.": kom,
+    };
 
-    this.setCtxValue(ctx, `${f.element} (Š)`, S);
-    this.setCtxValue(ctx, `${f.element} (V)`, V);
-    this.setCtxValue(ctx, `${f.element} Kom.`, kom);
-    this.setCtxValue(ctx, `${f.element} Kom`, kom);
+    this.setCtxValue(cenaCtx, "S", S);
+    this.setCtxValue(cenaCtx, "V", V);
+    this.setCtxValue(cenaCtx, "kom", kom);
+    this.setCtxValue(cenaCtx, "Kom.", kom);
 
-this.setCtxValue(ctx, "S", S);
-this.setCtxValue(ctx, "V", V);
-this.setCtxValue(ctx, "kom", kom);
-this.setCtxValue(ctx, "Kom.", kom);
+    this.setCtxValue(cenaCtx, `${f.element} (Š)`, S);
+    this.setCtxValue(cenaCtx, `${f.element} (V)`, V);
+    this.setCtxValue(cenaCtx, `${f.element} Kom.`, kom);
+    this.setCtxValue(cenaCtx, `${f.element} Kom`, kom);
 
     if (String(f.element).toLowerCase().includes("spojnica 1")) {
-      this.setCtxValue(ctx, "Spojnica 1 Kom.", kom);
-      this.setCtxValue(ctx, "Spojnica 1 Kom", kom);
+      this.setCtxValue(cenaCtx, "Spojnica 1 Kom.", kom);
+      this.setCtxValue(cenaCtx, "Spojnica 1 Kom", kom);
     }
 
     if (String(f.element).toLowerCase().includes("spojnica 2")) {
-      this.setCtxValue(ctx, "Spojnica 2 Kom.", kom);
-      this.setCtxValue(ctx, "Spojnica 2 Kom", kom);
+      this.setCtxValue(cenaCtx, "Spojnica 2 Kom.", kom);
+      this.setCtxValue(cenaCtx, "Spojnica 2 Kom", kom);
     }
 
-    const cena = f.cena ? evaluateFormula(f.cena, ctx) : 0;
+    const cena = f.cena ? evaluateFormula(f.cena, cenaCtx) : 0;
 
     results.push({
       element: f.element,
@@ -393,6 +515,15 @@ this.setCtxValue(ctx, "Kom.", kom);
       cena,
     });
 
+    this.setCtxValue(ctx, "S", S);
+    this.setCtxValue(ctx, "V", V);
+    this.setCtxValue(ctx, "kom", kom);
+    this.setCtxValue(ctx, "Kom.", kom);
+
+    this.setCtxValue(ctx, `${f.element} (Š)`, S);
+    this.setCtxValue(ctx, `${f.element} (V)`, V);
+    this.setCtxValue(ctx, `${f.element} Kom.`, kom);
+    this.setCtxValue(ctx, `${f.element} Kom`, kom);
     this.setCtxValue(ctx, `${f.element} Cena`, cena);
     this.setCtxValue(ctx, `${f.element} Cena elemenata`, cena);
   }
@@ -447,7 +578,11 @@ this.setCtxValue(ctx, "Kom.", kom);
     orderBy: { redosled: "asc" },
   });
 
-  const ctx = await this.buildCtx(input, false);
+  const ctx = await this.buildCtx(
+  input,
+  Number(input.userId),
+  false,
+);
   const results: any[] = [];
 
   for (const f of formulas) {
@@ -466,33 +601,33 @@ this.setCtxValue(ctx, "Kom.", kom);
 const kom =
   rawKom === null || rawKom === undefined || rawKom === ""
     ? 0
-    : Number(rawKom);
+    : isNaN(Number(rawKom))
+      ? evaluateFormula(String(rawKom), ctx)
+      : Number(rawKom);
 
-    this.setCtxValue(ctx, "S", S);
-    this.setCtxValue(ctx, "V", V);
-    this.setCtxValue(ctx, "kom", kom);
+    const cenaCtx: Record<string, number> = {
+      ...ctx,
+      S,
+      V,
+      s: S,
+      v: V,
+      kom,
+      "Kom.": kom,
+    };
 
-    this.setCtxValue(ctx, `${f.element} (Š)`, S);
-    this.setCtxValue(ctx, `${f.element} (V)`, V);
-    this.setCtxValue(ctx, `${f.element} Kom.`, kom);
-    this.setCtxValue(ctx, `${f.element} Kom`, kom);
+    this.setCtxValue(cenaCtx, "S", S);
+    this.setCtxValue(cenaCtx, "V", V);
+    this.setCtxValue(cenaCtx, "kom", kom);
+    this.setCtxValue(cenaCtx, "Kom.", kom);
 
-this.setCtxValue(ctx, "S", S);
-this.setCtxValue(ctx, "V", V);
-this.setCtxValue(ctx, "kom", kom);
-this.setCtxValue(ctx, "Kom.", kom);
+    this.setCtxValue(cenaCtx, `${f.element} (Š)`, S);
+    this.setCtxValue(cenaCtx, `${f.element} (V)`, V);
+    this.setCtxValue(cenaCtx, `${f.element} Kom.`, kom);
+    this.setCtxValue(cenaCtx, `${f.element} Kom`, kom);
 
-    if (String(f.element).toLowerCase().includes("spojnica 1")) {
-      this.setCtxValue(ctx, "Spojnica 1 Kom.", kom);
-      this.setCtxValue(ctx, "Spojnica 1 Kom", kom);
-    }
 
-    if (String(f.element).toLowerCase().includes("spojnica 2")) {
-      this.setCtxValue(ctx, "Spojnica 2 Kom.", kom);
-      this.setCtxValue(ctx, "Spojnica 2 Kom", kom);
-    }
 
-    const cena = f.cena ? evaluateFormula(f.cena, ctx) : 0;
+    const cena = f.cena ? evaluateFormula(f.cena, cenaCtx) : 0;
 
     results.push({
       element: f.element,
@@ -502,6 +637,15 @@ this.setCtxValue(ctx, "Kom.", kom);
       cena,
     });
 
+    this.setCtxValue(ctx, "S", S);
+    this.setCtxValue(ctx, "V", V);
+    this.setCtxValue(ctx, "kom", kom);
+    this.setCtxValue(ctx, "Kom.", kom);
+
+    this.setCtxValue(ctx, `${f.element} (Š)`, S);
+    this.setCtxValue(ctx, `${f.element} (V)`, V);
+    this.setCtxValue(ctx, `${f.element} Kom.`, kom);
+    this.setCtxValue(ctx, `${f.element} Kom`, kom);
     this.setCtxValue(ctx, `${f.element} Cena`, cena);
     this.setCtxValue(ctx, `${f.element} Cena elemenata`, cena);
   }
@@ -528,19 +672,21 @@ this.setCtxValue(ctx, "Kom.", kom);
   const zarada = Number(ctx["Zarada %"] || 0);
 
   const ukupnaCena =
-    komarnikCena +
-    roletnaCena +
-    (zbirOstalih + plastika + okov) *
-      (1 + otpad / 100) *
-      (1 + zarada / 100);
+  komarnikCena +
+  roletnaCena +
+  (zbirOstalih + plastika + okov) *
+    (1 + otpad / 100) *
+    (1 + zarada / 100);
 
-  results.push({
-    element: "Ukupna cena",
-    S: 0,
-    V: 0,
-    kom: 1,
-    cena: Number(ukupnaCena.toFixed(2)),
-  });
+
+
+results.push({
+  element: "Ukupna cena",
+  S: 0,
+  V: 0,
+  kom: 1,
+  cena: Number(ukupnaCena.toFixed(2)),
+});
 
   return results;
 }

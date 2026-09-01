@@ -585,6 +585,34 @@ const kom =
 );
   const results: any[] = [];
 
+
+
+// Kontekst za NABAVNE cene.
+// Sve zarade su 0, ali osnovne cene materijala ostaju iste.
+const nabavnaCtx: Record<string, number> = {
+  ...ctx,
+};
+
+// Opšta zarada
+this.setCtxValue(nabavnaCtx, "Zarada %", 0);
+this.setCtxValue(nabavnaCtx, "ZPROC", 0);
+this.setCtxValue(nabavnaCtx, "Zarada Procenat", 0);
+this.setCtxValue(nabavnaCtx, "ZARADA_PROCENAT", 0);
+
+// Posebna zarada za roletnu
+this.setCtxValue(nabavnaCtx, "Roletna %", 0);
+this.setCtxValue(nabavnaCtx, "RPROC", 0);
+this.setCtxValue(nabavnaCtx, "Roletna Procenat", 0);
+this.setCtxValue(nabavnaCtx, "ROLETNA_PROCENAT", 0);
+
+// Posebna zarada za komarnik
+this.setCtxValue(nabavnaCtx, "Komarnik %", 0);
+this.setCtxValue(nabavnaCtx, "KPROC", 0);
+this.setCtxValue(nabavnaCtx, "Komarnik Procenat", 0);
+this.setCtxValue(nabavnaCtx, "KOMARNIK_PROCENAT", 0);
+
+
+
   for (const f of formulas) {
     const hasFormula =
       Boolean(f.s && f.s.trim()) ||
@@ -615,6 +643,19 @@ const kom =
       "Kom.": kom,
     };
 
+
+const nabavnaCenaCtx: Record<string, number> = {
+  ...nabavnaCtx,
+  S,
+  V,
+  s: S,
+  v: V,
+  kom,
+  "Kom.": kom,
+};
+
+
+
     this.setCtxValue(cenaCtx, "S", S);
     this.setCtxValue(cenaCtx, "V", V);
     this.setCtxValue(cenaCtx, "kom", kom);
@@ -626,16 +667,34 @@ const kom =
     this.setCtxValue(cenaCtx, `${f.element} Kom`, kom);
 
 
+this.setCtxValue(nabavnaCenaCtx, "S", S);
+this.setCtxValue(nabavnaCenaCtx, "V", V);
+this.setCtxValue(nabavnaCenaCtx, "kom", kom);
+this.setCtxValue(nabavnaCenaCtx, "Kom.", kom);
+
+this.setCtxValue(nabavnaCenaCtx, `${f.element} (Š)`, S);
+this.setCtxValue(nabavnaCenaCtx, `${f.element} (V)`, V);
+this.setCtxValue(nabavnaCenaCtx, `${f.element} Kom.`, kom);
+this.setCtxValue(nabavnaCenaCtx, `${f.element} Kom`, kom);
+
+
 
     const cena = f.cena ? evaluateFormula(f.cena, cenaCtx) : 0;
 
-    results.push({
-      element: f.element,
-      S,
-      V,
-      kom,
-      cena,
-    });
+
+const nabavnaCena = f.cena
+  ? evaluateFormula(f.cena, nabavnaCenaCtx)
+  : 0;
+
+
+results.push({
+  element: f.element,
+  S,
+  V,
+  kom,
+  cena,
+  nabavnaCena,
+});
 
     this.setCtxValue(ctx, "S", S);
     this.setCtxValue(ctx, "V", V);
