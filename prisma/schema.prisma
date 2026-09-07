@@ -25,6 +25,7 @@ model Offer {
   vrsta_ponude String?
   valuta       String?
   popust       String?
+  avans        Float?
   napomena     String?
 
 

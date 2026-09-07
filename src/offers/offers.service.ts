@@ -97,8 +97,9 @@ const prefix =
         datum: data.datum,
         vrsta_ponude: data.vrsta_ponude,
         valuta: data.valuta ? String(data.valuta) : '',
-        popust: data.popust,
-        napomena: data.napomena,
+popust: data.popust,
+avans: Number(data.avans) || 0,
+napomena: data.napomena,
 
         items: {
           create: (data.positions || []).map((p: any) => ({
@@ -156,8 +157,9 @@ dod_element: p.dod_element || "",
         datum: data.datum,
         vrsta_ponude: data.vrsta_ponude,
         valuta: data.valuta ? String(data.valuta) : '',
-        popust: data.popust,
-        napomena: data.napomena,
+popust: data.popust,
+avans: Number(data.avans) || 0,
+napomena: data.napomena,
       },
     });
 
